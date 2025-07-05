@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: article-kump
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./articles-consumer/Service/Migration/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"v
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  publisher:
+    build:
+      context: ./articles-publisher
+      dockerfile: Dockerfile
+    container_name: publisher
+    ports:
+      - "9090:9090"
+    environment:
+      - DB_DSN=postgres://postgres:root1234@postgres-db:5432/article-kump?sslmode=disable
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - HOST_DB=postgres-db
+      - HOST_RABBIT=rabbitmq
+      - CONSUMER_HOST=http://consumer:9000
+    depends_on:
+      - db
+      - rabbitmq
+
+  consumer:
+    build:
+      context: ./articles-consumer
+      dockerfile: Dockerfile
+    container_name: consumer
+    ports:
+      - "9000:9000"
+    environment:
+      - DB_DSN=postgres://postgres:root1234@postgres-db:5432/article-kump?sslmode=disable
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - HOST_DB=postgres-db
+      - HOST_RABBIT=rabbitmq
+      - CONSUMER_HOST=http://consumer:9000
+    depends_on:
+      - db
+      - rabbitmq
