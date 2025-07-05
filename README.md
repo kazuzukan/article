@@ -2,7 +2,7 @@
 ## About
 This project uses two services, namely articles-publisher as publisher and articles-consumer as consumer, implementing an event-driven architecture using RabbitMQ and PostgreSQL as the database.
 
-![image](https://github.com/user-attachments/assets/db602a92-966f-4fad-912b-f300dbd1fde2)
+![image](https://github.com/user-attachments/assets/33ac273a-7195-442d-83d3-f0f0e43eb038)
 
 ## Feature
 - Create Article
